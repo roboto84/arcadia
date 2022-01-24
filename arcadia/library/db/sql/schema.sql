@@ -1,0 +1,8 @@
+
+CREATE TABLE ITEMS(
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    time_stamp TEXT NOT NULL,
+    data TEXT NOT NULL,
+    data_type TEXT NOT NULL,
+    tags TEXT NOT NULL
+);
