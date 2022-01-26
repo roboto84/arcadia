@@ -45,15 +45,23 @@ class Vine:
 
     def _structure_vine(self, records):
         try:
-            for sub_category in self._vine_sub_categories:
+            if len(self._vine_sub_categories) == 0:
+                new_node: dict = self._get_vine_node('self')
                 for record in records:
-                    if sub_category in record['tags']:
-                        record['tags'].remove(sub_category)
-                        new_node: dict = self._get_vine_node(sub_category)
-                        if record['data_type'] == 'note':
-                            new_node['notes'].append(record)
-                        elif record['data_type'] == 'hyperlink':
-                            new_node['hyperlinks'].append(record)
+                    if record['data_type'] == 'note':
+                        new_node['notes'].append(record)
+                    elif record['data_type'] == 'hyperlink':
+                        new_node['hyperlinks'].append(record)
+            else:
+                for sub_category in self._vine_sub_categories:
+                    for record in records:
+                        if sub_category in record['tags']:
+                            record['tags'].remove(sub_category)
+                            new_node: dict = self._get_vine_node(sub_category)
+                            if record['data_type'] == 'note':
+                                new_node['notes'].append(record)
+                            elif record['data_type'] == 'hyperlink':
+                                new_node['hyperlinks'].append(record)
 
         except TypeError as type_error:
             self._logger.error(f'Received error structuring vine: {str(type_error)}')
