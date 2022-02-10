@@ -14,6 +14,17 @@ class Arcadia:
         self._logger.setLevel(logging.INFO)
         self._arcadia_db = ArcadiaDb(logging_object, sql_lite_db_path)
 
+    def add_item(self, item_package) -> bool:
+        try:
+            self._arcadia_db.insert_record(item_package)
+            return True
+        except TypeError as type_error:
+            self._logger.error(f'Received error trying to add record: {str(type_error)}')
+            return False
+        except Exception as error:
+            self._logger.error(f'Received error trying to add record: {str(error)}')
+            return False
+
     def get_summary(self, main_tag) -> str:
         try:
             records: list[sqlite3.Row] = self._arcadia_db.get_records(main_tag)

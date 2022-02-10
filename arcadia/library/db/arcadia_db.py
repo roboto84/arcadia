@@ -60,7 +60,7 @@ class ArcadiaDb(SqlLiteDb):
             self._logger.error(f'Error occurred getting tags from Arcadia_DB: {str(error)}')
 
     def insert_record(self, item_package: dict) -> None:
-        item_data: str = item_package['data']
+        item_data: str = item_package['content']
         sql_path: str = self.add_file_path('/sql/insert_record.sql')
         conn: Connection = self._db_connect()
         db_cursor: Cursor = conn.cursor()
@@ -72,11 +72,13 @@ class ArcadiaDb(SqlLiteDb):
                 with open(sql_path, 'r') as file:
                     db_cursor.execute(
                         file.read(),
-                        (self._get_time(), item_data, item_package['data_type'], item_package['tags']))
+                        (self._get_time(), item_data, item_package['data_type'], str(item_package['tags'])))
             except IOError as io_error:
                 self._logger.error(f'IOError was thrown: {str(io_error)}')
+                raise
             except Exception as exception:
                 self._logger.error(f'Exception was thrown: {str(exception)}')
+                raise
         else:
             self._logger.info(f'"{item_data}" is already in the DB, not reinserting')
         self._db_close(conn)
