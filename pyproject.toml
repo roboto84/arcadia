@@ -5,12 +5,12 @@ description = 'Command line and lib toolset for data organization framework'
 authors = ['roboto84 <7658704+roboto84@users.noreply.github.com>']
 
 [tool.poetry.dependencies]
-python = '^3.9'
+python = '^3.10'
 python-dotenv = '^0.15.0'
 willow-core = {git = 'https://github.com/roboto84/willow_core.git', rev = '59d8f44'}
 
 [tool.poetry.dev-dependencies]
-pytest = '^5.2'
+pytest = '^6.2.5'
 
 [build-system]
 requires = ['poetry-core>=1.0.0']
