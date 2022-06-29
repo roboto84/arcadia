@@ -25,7 +25,7 @@ class Vine:
 
     def __str__(self):
         try:
-            title: str = f'\n🌿  {self._vine["subject"].capitalize()}\n'
+            title: str = f'🌿  {self._vine["subject"].capitalize()}\n'
             main_category_summary: str = ''
             sub_category_summaries: str = ''
             if len(self._records) == 0:
@@ -96,11 +96,11 @@ class Vine:
         return new_node
 
     def _main_category_summary(self, node, node_type: NodeType):
-        return f'{self._category_summary(node, node_type)}'
+        return f'  {self._category_summary(node, node_type)}'
 
     def _sub_category_summary(self, node, node_type: NodeType):
         return f'  {node["subject"]}: \n' \
-               f'{self._category_summary(node, node_type)}'
+               f'  {self._category_summary(node, node_type)}'
 
     def _category_summary(self, node, node_type: NodeType):
         try:
@@ -113,7 +113,7 @@ class Vine:
         try:
             if len(node_array):
                 spacer: str = '' if node_type == NodeType.main else '   '
-                return ''.join(
+                return '  '.join(
                     f'{spacer}◦ {item["time_stamp"]}{self.tag_string(item["tags"])}: {str(item["data"])}\n'
                     for item in node_array
                 )
