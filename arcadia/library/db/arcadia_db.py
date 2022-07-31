@@ -37,7 +37,7 @@ class ArcadiaDb(SqlLiteDb):
 
     def get_records(self, tag: str) -> list[Row]:
         try:
-            sqlite_query: str = f'select * from ITEMS where tags LIKE "%{tag}%" order by id desc'
+            sqlite_query: str = f'select * from ITEMS where tags LIKE "%\'{tag}\'%" order by id desc'
             conn: Connection = self._db_connect()
             self.set_row_factory(conn)
             db_cursor: Cursor = conn.cursor()

@@ -7,9 +7,10 @@ from typing import Any, Optional
 
 
 class Vine:
-    def __init__(self, logging_object: Any, main_tag: str, records: list[sqlite3.Row]):
+    def __init__(self, logging_object: Any, main_tag: str, records: list[sqlite3.Row], enhanced_view: bool):
         self._logger: logging.Logger = logging_object.getLogger(type(self).__name__)
         self._logger.setLevel(logging.INFO)
+        self._enhanced_view = enhanced_view
         self._vine: dict = {
             'subject': main_tag,
             'main_node': {},
@@ -25,17 +26,19 @@ class Vine:
 
     def __str__(self):
         try:
-            title: str = f'🌿  {self._vine["subject"].capitalize()}\n'
+            title_raw: str = f'{self._vine["subject"].capitalize()}'
+            title: str = f'*{title_raw}*' if self._enhanced_view else title_raw
+            title_view: str = f'🌿  {title}\n'
             main_category_summary: str = ''
             sub_category_summaries: str = ''
             if len(self._records) == 0:
-                return f'{title} No results found\n'
+                return f'{title_view} No results found\n'
             else:
                 if self._vine['main_node']:
                     main_category_summary += self._main_category_summary(self._vine['main_node'], NodeType.main)
                 for node in self._vine['sub_node']:
                     sub_category_summaries += self._sub_category_summary(node, NodeType.sub)
-                return f'{title}' \
+                return f'{title_view}' \
                        f'{main_category_summary}\n' \
                        f'{sub_category_summaries}'
         except TypeError as type_error:
@@ -99,7 +102,9 @@ class Vine:
         return f'  {self._category_summary(node, node_type)}'
 
     def _sub_category_summary(self, node, node_type: NodeType):
-        return f'  {node["subject"]}: \n' \
+        subtitle_raw: str = node["subject"]
+        subtitle: str = f'*{subtitle_raw}*' if self._enhanced_view else f'{subtitle_raw}:'
+        return f'  {subtitle}\n' \
                f'  {self._category_summary(node, node_type)}'
 
     def _category_summary(self, node, node_type: NodeType):
@@ -125,7 +130,7 @@ class Vine:
     @staticmethod
     def tag_string(tags):
         if tags:
-            tag_string = ''.join(f'{tag}, ' for tag in tags).rstrip(', ')
-            return f' ({tag_string})'
+            tag_string = ''.join(f'{tag},' for tag in tags).rstrip(', ')
+            return f'{tag_string}'
         else:
             return ''

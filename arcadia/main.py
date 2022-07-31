@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
         if len(sys.argv) == 2:
             search_term = sys.argv[1]
-            arcadia = Arcadia(SQL_LITE_DB, logging)
+            arcadia = Arcadia(logging, SQL_LITE_DB, False)
             print(f'Current Subjects: {arcadia.get_subjects()}')
             print(arcadia.get_summary(search_term))
         else:
