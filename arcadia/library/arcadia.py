@@ -2,6 +2,7 @@ import logging.config
 import sqlite3
 import ast
 from typing import Any
+from .db.db_types import AddDbItemResponse, ItemPackage
 from .vine import Vine
 from .db.arcadia_db import ArcadiaDb
 
@@ -14,16 +15,23 @@ class Arcadia:
         self._enhanced_view = enhanced_view
         self._arcadia_db = ArcadiaDb(logging_object, sql_lite_db_path)
 
-    def add_item(self, item_package) -> bool:
+    def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
+        response: AddDbItemResponse = {
+            'added_item': False,
+            'reason': 'error',
+            'data': []
+        }
         try:
-            self._arcadia_db.insert_record(item_package)
-            return True
+            attempt_insert: AddDbItemResponse = self._arcadia_db.insert_record(item_package)
+            return attempt_insert
         except TypeError as type_error:
             self._logger.error(f'Received error trying to add record: {str(type_error)}')
-            return False
+            response['data'] = ['Received error trying to add record']
+            return response
         except Exception as error:
             self._logger.error(f'Received error trying to add record: {str(error)}')
-            return False
+            response['data'] = ['Received error trying to add record']
+            return response
 
     def get_summary(self, main_tag) -> str:
         try:

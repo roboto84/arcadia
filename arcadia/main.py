@@ -2,6 +2,8 @@ import os
 import sys
 import logging.config
 from dotenv import load_dotenv
+
+from arcadia.library.db.db_types import ItemPackage, ArcadiaDataType
 from library.arcadia import Arcadia
 
 if __name__ == '__main__':
@@ -18,6 +20,16 @@ if __name__ == '__main__':
             arcadia = Arcadia(logging, SQL_LITE_DB, False)
             print(f'Current Subjects: {arcadia.get_subjects()}')
             print(arcadia.get_summary(search_term))
+        elif len(sys.argv) == 3:
+            add_data = sys.argv[1]
+            data_tags = sys.argv[2].split(',')
+            arcadia = Arcadia(logging, SQL_LITE_DB, False)
+            add_package: ItemPackage = {
+                'data_type': ArcadiaDataType.HYPERLINK,
+                'content': add_data,
+                'tags': data_tags
+            }
+            print(arcadia.add_item(add_package))
         else:
             print('Please give term to search')
 

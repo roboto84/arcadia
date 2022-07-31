@@ -4,6 +4,7 @@ import os
 from willow_core.library.sqlite_db import SqlLiteDb
 from sqlite3 import Connection, Cursor, Error, Row
 from typing import Any
+from .db_types import AddDbItemResponse, ItemPackage
 
 
 class ArcadiaDb(SqlLiteDb):
@@ -59,12 +60,20 @@ class ArcadiaDb(SqlLiteDb):
         except Error as error:
             self._logger.error(f'Error occurred getting tags from Arcadia_DB: {str(error)}')
 
-    def insert_record(self, item_package: dict) -> None:
+    def insert_record(self, item_package: ItemPackage) -> AddDbItemResponse:
+        response: AddDbItemResponse = {
+            'added_item': False,
+            'reason': 'item_duplicate',
+            'data': []
+        }
         item_data: str = item_package['content']
         sql_path: str = self.add_file_path('/sql/insert_record.sql')
         conn: Connection = self._db_connect()
         db_cursor: Cursor = conn.cursor()
-        table_list = db_cursor.execute("""SELECT data FROM ITEMS WHERE data is ?;""", [item_data]).fetchall()
+        table_list: list = db_cursor.execute(
+            """SELECT data, tags FROM ITEMS WHERE data is ?;""",
+            [item_data]
+        ).fetchall()
 
         if not table_list:
             try:
@@ -73,6 +82,11 @@ class ArcadiaDb(SqlLiteDb):
                     db_cursor.execute(
                         file.read(),
                         (self._get_time(), item_data, item_package['data_type'], str(item_package['tags'])))
+                response = {
+                    'added_item': True,
+                    'reason': 'item_added',
+                    'data': []
+                }
             except IOError as io_error:
                 self._logger.error(f'IOError was thrown: {str(io_error)}')
                 raise
@@ -81,4 +95,6 @@ class ArcadiaDb(SqlLiteDb):
                 raise
         else:
             self._logger.info(f'"{item_data}" is already in the DB, not reinserting')
+            response['data'] = table_list
         self._db_close(conn)
+        return response
