@@ -81,8 +81,8 @@ class ArcadiaDb(SqlLiteDb):
                 with open(sql_path, 'r') as file:
                     db_cursor.execute(
                         file.read(),
-                        (self._get_time(), item_data, item_package['data_type'], str(item_package['tags'])))
-                response = {
+                        (self._get_time(), item_data, item_package['data_type'].value, str(item_package['tags'])))
+                response: AddDbItemResponse = {
                     'added_item': True,
                     'reason': 'item_added',
                     'data': []

@@ -3,16 +3,25 @@ from enum import Enum
 
 
 class ArcadiaDataType(Enum):
-    HYPERLINK = 'hyperlink'
+    NOTE = 'NOTE'
+    URL = 'URL'
+
+
+class ArcadiaDbRecord(TypedDict):
+    ID: str
+    time_stamp: str
+    data: str
+    tags: list[str]
+    data_type: str
 
 
 class AddDbItemResponse(TypedDict):
     added_item: bool
     reason: str
-    data: list
+    data: list[str]
 
 
 class ItemPackage(TypedDict):
     data_type: ArcadiaDataType
     content: str
-    tags: list
+    tags: list[str]

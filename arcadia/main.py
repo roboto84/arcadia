@@ -25,7 +25,7 @@ if __name__ == '__main__':
             data_tags = sys.argv[2].split(',')
             arcadia = Arcadia(logging, SQL_LITE_DB, False)
             add_package: ItemPackage = {
-                'data_type': ArcadiaDataType.HYPERLINK,
+                'data_type': ArcadiaDataType.URL,
                 'content': add_data,
                 'tags': data_tags
             }
