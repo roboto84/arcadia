@@ -7,7 +7,7 @@ authors = ['roboto84 <7658704+roboto84@users.noreply.github.com>']
 [tool.poetry.dependencies]
 python = '^3.10'
 python-dotenv = '^0.15.0'
-willow-core = {git = 'https://github.com/roboto84/willow_core.git', rev = '59d8f44'}
+willow-core = {git = 'https://github.com/roboto84/willow_core.git', rev = '646a99f'}
 
 [tool.poetry.dev-dependencies]
 pytest = '^6.2.5'
