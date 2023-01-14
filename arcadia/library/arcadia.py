@@ -1,19 +1,21 @@
 import logging.config
 import sqlite3
 import ast
-from typing import Any
+from typing import Any, Union
+
+from .arcadia_types import DataViewType, VineRoot
 from .db.db_types import AddDbItemResponse, ItemPackage
 from .vine import Vine
 from .db.arcadia_db import ArcadiaDb
 
 
 class Arcadia:
-    def __init__(self, logging_object: Any, sql_lite_db_path: str, enhanced_view: bool):
+    def __init__(self, logging_object: Any, sql_lite_db_path: str, data_view_type: DataViewType):
         self._logging_object = logging_object
         self._logger: logging.Logger = logging_object.getLogger(type(self).__name__)
         self._logger.setLevel(logging.INFO)
-        self._enhanced_view = enhanced_view
-        self._arcadia_db = ArcadiaDb(logging_object, sql_lite_db_path)
+        self._data_view_type: DataViewType = data_view_type
+        self._arcadia_db: ArcadiaDb = ArcadiaDb(logging_object, sql_lite_db_path)
 
     def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {
@@ -33,10 +35,12 @@ class Arcadia:
             response['data'] = ['Received error trying to add record']
             return response
 
-    def get_summary(self, main_tag) -> str:
+    def get_summary(self, main_tag: str) -> Union[VineRoot, str]:
         try:
             records: list[sqlite3.Row] = self._arcadia_db.get_records(main_tag)
-            arcadia_vine = Vine(self._logging_object, main_tag, records, self._enhanced_view)
+            arcadia_vine: Vine = Vine(self._logging_object, main_tag, records, self._data_view_type)
+            if self._data_view_type == DataViewType.RAW:
+                return arcadia_vine.get_vine_root()
             return arcadia_vine.__str__()
         except TypeError as type_error:
             self._logger.error(f'Received error getting record vine: {str(type_error)}')
@@ -61,7 +65,7 @@ class Arcadia:
         subjects_list: list[str] = subjects.split(',')
         ascii_start: int = 65
         ascii_stop: int = 91
-        ascii_loop_counter = ascii_start
+        ascii_loop_counter: int = ascii_start
         ascii_range: int = ascii_stop - ascii_start
         alphabetical_tags: dict[str:list[str]] = {}
 

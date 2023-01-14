@@ -3,17 +3,17 @@ import ast
 import sqlite3
 import logging.config
 
-from .arcadia_types import NodeType, VineNode, VineRoot
+from .arcadia_types import NodeType, VineNode, VineRoot, DataViewType
 from typing import Any, Optional
 
 from .db.db_types import ArcadiaDbRecord, ArcadiaDataType
 
 
 class Vine:
-    def __init__(self, logging_object: Any, main_tag: str, records: list[sqlite3.Row], enhanced_view: bool):
+    def __init__(self, logging_object: Any, main_tag: str, records: list[sqlite3.Row], data_view_type: DataViewType):
         self._logger: logging.Logger = logging_object.getLogger(type(self).__name__)
         self._logger.setLevel(logging.INFO)
-        self._enhanced_view: bool = enhanced_view
+        self._data_view_type: DataViewType = data_view_type
         self._vine: VineRoot = {
             'subject': main_tag,
             'main_node': None,
@@ -30,7 +30,7 @@ class Vine:
     def __str__(self):
         try:
             title_raw: str = f'{self._vine["subject"].capitalize()}'
-            title: str = f'*{title_raw}*' if self._enhanced_view else title_raw
+            title: str = f'*{title_raw}*' if self._data_view_type == DataViewType.ENHANCED_TEXT else title_raw
             title_view: str = f'🌿  {title}\n'
             main_category_summary: str = ''
             sub_category_summaries: str = ''
@@ -107,7 +107,8 @@ class Vine:
 
     def _sub_category_summary(self, node, node_type: NodeType) -> str:
         subtitle_raw: str = node["subject"]
-        subtitle: str = f'*{subtitle_raw}*' if self._enhanced_view else f'{subtitle_raw}:'
+        subtitle: str = f'*{subtitle_raw}*' \
+            if self._data_view_type == DataViewType.ENHANCED_TEXT else f'{subtitle_raw}:'
         return f'  {subtitle}\n' \
                f'  {self._category_summary(node, node_type)}'
 
@@ -138,3 +139,6 @@ class Vine:
             return f'{tag_string}'
         else:
             return ''
+
+    def get_vine_root(self) -> VineRoot:
+        return self._vine

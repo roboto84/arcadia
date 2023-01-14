@@ -1,8 +1,13 @@
 
 from enum import Enum
 from typing import TypedDict, Union
+from .db.db_types import ArcadiaDbRecord
 
-from arcadia.library.db.db_types import ArcadiaDbRecord
+
+class DataViewType(Enum):
+    TEXT = 'TEXT'
+    ENHANCED_TEXT = 'ENHANCED_TEXT'
+    RAW = 'RAW'
 
 
 class NodeType(Enum):
