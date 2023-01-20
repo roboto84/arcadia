@@ -17,6 +17,14 @@ class Arcadia:
         self._data_view_type: DataViewType = data_view_type
         self._arcadia_db: ArcadiaDb = ArcadiaDb(logging_object, sql_lite_db_path)
 
+    def _get_subjects_list(self) -> list:
+        subjects: Union[str, list] = self.get_subjects()
+        if isinstance(subjects, list):
+            subjects_list = subjects
+        else:
+            subjects_list: list[str] = subjects.split(',')
+        return subjects_list
+
     def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {
             'added_item': False,
@@ -45,7 +53,7 @@ class Arcadia:
         except TypeError as type_error:
             self._logger.error(f'Received error getting record vine: {str(type_error)}')
 
-    def get_subjects(self) -> str:
+    def get_subjects(self) -> Union[str, list]:
         try:
             db_tags: list[sqlite3.Row] = self._arcadia_db.get_tags()
             subjects: list = []
@@ -56,26 +64,42 @@ class Arcadia:
                     if item_tag not in subjects:
                         subjects.append(item_tag)
             subjects.sort(key=lambda subject: subject.lower())
-            return Vine.tag_string(subjects)
+            return subjects if self._data_view_type == DataViewType.RAW else Vine.tag_string(subjects)
         except TypeError as type_error:
             self._logger.error(f'Received error getting arcadia subjects: {str(type_error)}')
 
     def get_subjects_dictionary(self) -> dict[str:list[str]]:
-        subjects: str = self.get_subjects()
-        subjects_list: list[str] = subjects.split(',')
-        ascii_start: int = 65
-        ascii_stop: int = 91
-        ascii_loop_counter: int = ascii_start
-        ascii_range: int = ascii_stop - ascii_start
-        alphabetical_tags: dict[str:list[str]] = {}
+        try:
+            subjects_list = self._get_subjects_list()
+            ascii_start: int = 65
+            ascii_stop: int = 91
+            ascii_loop_counter: int = ascii_start
+            ascii_range: int = ascii_stop - ascii_start
+            alphabetical_tags: dict[str:list[str]] = {}
 
-        for index in range(ascii_range):
-            if ascii_loop_counter < ascii_stop:
-                key_letter: str = chr(ascii_loop_counter)
-                alphabetical_tags[key_letter] = []
-                for subject_index in range(len(subjects_list)):
-                    subject_first_letter: str = subjects_list[subject_index][0].capitalize()
-                    if subject_first_letter == key_letter:
-                        alphabetical_tags[key_letter].append(subjects_list[subject_index])
-            ascii_loop_counter += 1
-        return alphabetical_tags
+            for index in range(ascii_range):
+                if ascii_loop_counter < ascii_stop:
+                    key_letter: str = chr(ascii_loop_counter)
+                    alphabetical_tags[key_letter] = []
+                    for subject_index in range(len(subjects_list)):
+                        subject_first_letter: str = subjects_list[subject_index][0].capitalize()
+                        if subject_first_letter == key_letter:
+                            alphabetical_tags[key_letter].append(subjects_list[subject_index])
+                ascii_loop_counter += 1
+            return alphabetical_tags
+        except TypeError as type_error:
+            self._logger.error(f'Received error getting subjects dict: {str(type_error)}')
+        except Exception as error:
+            self._logger.error(f'Received error trying to get subjects dict: {str(error)}')
+
+    def get_similar_subjects(self, main_tag: str) -> list:
+        try:
+            similar_subjects: list = []
+            subjects_list = self._get_subjects_list()
+
+            for subject in subjects_list:
+                if main_tag != subject and main_tag in subject:
+                    similar_subjects.append(subject)
+            return similar_subjects
+        except TypeError as type_error:
+            self._logger.error(f'Received error getting similar subjects: {str(type_error)}')
