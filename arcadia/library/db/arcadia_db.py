@@ -36,29 +36,29 @@ class ArcadiaDb(SqlLiteDb):
         except Error as error:
             self._logger.error(f'Error occurred initializing Arcadia_DB: {str(error)}')
 
-    def get_records(self, tag: str) -> list[Row]:
+    def _query_for_db_rows(self, sqlite_query) -> list[Row]:
         try:
-            sqlite_query: str = f'select * from ITEMS where tags LIKE "%\'{tag}%" order by id desc'
-            conn: Connection = self._db_connect()
-            self.set_row_factory(conn)
-            db_cursor: Cursor = conn.cursor()
-            db_records_result: list[Row] = db_cursor.execute(sqlite_query).fetchall()
-            self._logger.info(f'Retrieved records from Arcadia_DB successfully')
-            return db_records_result
-        except Error as error:
-            self._logger.error(f'Error occurred getting records from Arcadia_DB: {str(error)}')
-
-    def get_tags(self) -> list[Row]:
-        try:
-            sqlite_query: str = f'select tags from ITEMS'
             conn: Connection = self._db_connect()
             self.set_row_factory(conn)
             db_cursor: Cursor = conn.cursor()
             db_records_result: list[Row] = db_cursor.execute(sqlite_query).fetchall()
             self._logger.info(f'Retrieved tags from Arcadia_DB successfully')
+            self._db_close(conn)
             return db_records_result
         except Error as error:
             self._logger.error(f'Error occurred getting tags from Arcadia_DB: {str(error)}')
+
+    def _get_column(self, column) -> list[Row]:
+        return self._query_for_db_rows(f'select {column} from ITEMS')
+
+    def get_records(self, tag: str) -> list[Row]:
+        return self._query_for_db_rows(f'select * from ITEMS where tags LIKE "%\'{tag}%" order by id desc')
+
+    def get_tags(self) -> list[Row]:
+        return self._get_column('tags')
+
+    def get_meta_data(self) -> list[Row]:
+        return self._get_column('data, title, description, image')
 
     def insert_record(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {
@@ -87,6 +87,8 @@ class ArcadiaDb(SqlLiteDb):
                     'reason': 'item_added',
                     'data': []
                 }
+            except Error as error:
+                self._logger.error(f'Error occurred inserting record into Arcadia_DB: {str(error)}')
             except IOError as io_error:
                 self._logger.error(f'IOError was thrown: {str(io_error)}')
                 raise
@@ -98,3 +100,20 @@ class ArcadiaDb(SqlLiteDb):
             response['data'] = table_list
         self._db_close(conn)
         return response
+
+    def update_record_meta(self, data_key, title, description, image) -> None:
+        try:
+            conn: Connection = self._db_connect()
+            self.set_row_factory(conn)
+            db_cursor: Cursor = conn.cursor()
+            db_cursor.execute(
+                """UPDATE items SET title = ?, description = ?, image = ? WHERE data = ?;""",
+                [title, description, image, data_key]
+            )
+            self._db_close(conn)
+            self._logger.info(f'Updated meta data successfully for: {data_key}')
+        except Error as error:
+            self._logger.error(f'Error occurred updating meta on Arcadia_DB at {data_key}: {str(error)}')
+        except Exception as exception:
+            self._logger.error(f'Exception was thrown: {str(exception)}')
+            raise

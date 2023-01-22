@@ -4,7 +4,8 @@ import ast
 from typing import Any, Union
 
 from .arcadia_types import DataViewType, VineRoot
-from .db.db_types import AddDbItemResponse, ItemPackage
+from .collectors.scraper import Scraper
+from .db.db_types import AddDbItemResponse, ItemPackage, ArcadiaDataType
 from .vine import Vine
 from .db.arcadia_db import ArcadiaDb
 
@@ -33,6 +34,8 @@ class Arcadia:
         }
         try:
             attempt_insert: AddDbItemResponse = self._arcadia_db.insert_record(item_package)
+            if item_package['data_type'] == ArcadiaDataType.URL:
+                self.update_item_meta(item_package['content'])
             return attempt_insert
         except TypeError as type_error:
             self._logger.error(f'Received error trying to add record: {str(type_error)}')
@@ -42,6 +45,27 @@ class Arcadia:
             self._logger.error(f'Received error trying to add record: {str(error)}')
             response['data'] = ['Received error trying to add record']
             return response
+
+    def update_item_meta(self, db_url: str) -> None:
+        try:
+            self._logger.info(f'Attempting to get: {db_url}')
+            payload = Scraper.get_url_meta(db_url)
+
+            if payload:
+                title = payload['title']['content'] if payload['title'] else 'None'
+                description = payload['description']['content'] if payload['description'] else 'None'
+                image = payload['image']['href'] if payload['image'] else 'None'
+                self._arcadia_db.update_record_meta(
+                    db_url,
+                    title.strip(),
+                    description.strip(),
+                    image.strip()
+                )
+            else:
+                self._logger.error(f'Unsuccessful getting meta for: {db_url}')
+        except Exception as e:
+            self._logger.error(f'Exception was thrown: {str(e)}')
+            raise
 
     def get_summary(self, main_tag: str) -> Union[VineRoot, str]:
         try:
