@@ -63,8 +63,9 @@ class Vine:
 
     def _structure_vine(self, records: list[ArcadiaDbRecord]) -> None:
         try:
-            for sub_category in self._vine_sub_categories:
-                for record in records:
+            for record in records:
+                tags_copy = record['tags'].copy()
+                for sub_category in self._vine_sub_categories:
                     if sub_category in record['tags']:
                         node_type = NodeType.subNode
                         if sub_category == self._vine['subject']:
@@ -75,6 +76,7 @@ class Vine:
                             new_node['notes'].append(record)
                         elif record['data_type'] == ArcadiaDataType.URL.value:
                             new_node['urls'].append(record)
+                record['tags'] = tags_copy
 
         except TypeError as type_error:
             self._logger.error(f'Received error structuring vine: {str(type_error)}')
@@ -124,7 +126,7 @@ class Vine:
             if len(node_array):
                 spacer: str = '' if node_type == NodeType.root else '   '
                 return '  '.join(
-                    f'{spacer}◦ {item["time_stamp"]}{self.tag_string(item["tags"])}: {str(item["data"])}\n'
+                    f'{spacer}◦ {item["time_stamp"]} [{self.tag_string(item["tags"])}]: {str(item["data"])}\n'
                     for item in node_array
                 )
             else:
