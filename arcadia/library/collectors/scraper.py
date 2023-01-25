@@ -32,7 +32,7 @@ class Scraper:
     @staticmethod
     def get_url_title(beautiful_soup: BeautifulSoup) -> dict:
         try:
-            title_length = 60
+            title_length = 90
             title = beautiful_soup.find('meta', property='og:title')
             if title:
                 try:
@@ -60,7 +60,7 @@ class Scraper:
     @staticmethod
     def get_url_description(beautiful_soup: BeautifulSoup) -> dict:
         try:
-            description_length = 150
+            description_length = 300
             description = beautiful_soup.find('meta', property='og:description')
             if description:
                 try:
