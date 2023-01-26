@@ -52,7 +52,14 @@ class ArcadiaDb(SqlLiteDb):
         return self._query_for_db_rows(f'select {column} from ITEMS')
 
     def get_records(self, tag: str) -> list[Row]:
-        return self._query_for_db_rows(f'select * from ITEMS where tags LIKE "%\'{tag}%" order by id desc')
+        return self._query_for_db_rows(
+            f'select * from ITEMS '
+            f'where data LIKE "%{tag}%" or '
+            f'tags LIKE "%\'{tag}%" or '
+            f'title LIKE "%{tag}%" or '
+            f'description LIKE "%{tag}%" '
+            f'order by id desc'
+        )
 
     def get_tags(self) -> list[Row]:
         return self._get_column('tags')
