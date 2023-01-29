@@ -32,19 +32,25 @@ class Arcadia:
             'reason': 'error',
             'data': []
         }
-        try:
-            attempt_insert: AddDbItemResponse = self._arcadia_db.insert_record(item_package)
-            if item_package['data_type'] == ArcadiaDataType.URL:
-                self.update_item_meta(item_package['content'])
-            return attempt_insert
-        except TypeError as type_error:
-            self._logger.error(f'Received error trying to add record: {str(type_error)}')
-            response['data'] = ['Received error trying to add record']
+        print(item_package['tags'])
+        if '' in item_package['tags']:
+            response['reason'] = 'empty_string_tag'
+            response['data'] = item_package['tags']
             return response
-        except Exception as error:
-            self._logger.error(f'Received error trying to add record: {str(error)}')
-            response['data'] = ['Received error trying to add record']
-            return response
+        else:
+            try:
+                attempt_insert: AddDbItemResponse = self._arcadia_db.insert_record(item_package)
+                if item_package['data_type'] == ArcadiaDataType.URL:
+                    self.update_item_meta(item_package['content'])
+                return attempt_insert
+            except TypeError as type_error:
+                self._logger.error(f'Received error trying to add record: {str(type_error)}')
+                response['data'] = ['Received error trying to add record']
+                return response
+            except Exception as error:
+                self._logger.error(f'Received error trying to add record: {str(error)}')
+                response['data'] = ['Received error trying to add record']
+                return response
 
     def update_item_meta(self, db_url: str) -> None:
         try:
@@ -106,9 +112,10 @@ class Arcadia:
                     key_letter: str = chr(ascii_loop_counter)
                     alphabetical_tags[key_letter] = []
                     for subject_index in range(len(subjects_list)):
-                        subject_first_letter: str = subjects_list[subject_index][0].capitalize()
-                        if subject_first_letter == key_letter:
-                            alphabetical_tags[key_letter].append(subjects_list[subject_index])
+                        if subjects_list[subject_index] and subjects_list[subject_index][0]:
+                            subject_first_letter: str = subjects_list[subject_index][0].capitalize()
+                            if subject_first_letter == key_letter:
+                                alphabetical_tags[key_letter].append(subjects_list[subject_index])
                 ascii_loop_counter += 1
             return alphabetical_tags
         except TypeError as type_error:

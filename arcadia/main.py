@@ -19,6 +19,7 @@ if __name__ == '__main__':
         if len(sys.argv) == 2:
             search_term = sys.argv[1]
             arcadia = Arcadia(logging, SQL_LITE_DB, DataViewType.TEXT)
+            subjects = arcadia.get_subjects_dictionary()
             print(f'Similar Tags: {arcadia.get_similar_subjects(search_term)}')
             print(arcadia.get_summary(search_term))
         elif len(sys.argv) == 3:
