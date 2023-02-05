@@ -22,6 +22,18 @@ if __name__ == '__main__':
             subjects = arcadia.get_subjects_dictionary()
             print(f'Similar Tags: {arcadia.get_similar_subjects(search_term)}')
             print(arcadia.get_summary(search_term))
+
+            # TODO: Support deleting/updating items through CLI
+            # arcadia.delete_item('https://www.youtube.com/@MrCastIron/videos')
+            # print(arcadia.update_item(
+            #     'https://9anime.g/',
+            #     'https://9anime.gas/',
+            #     'Something Else',
+            #     ['hey', 'there', 'you'],
+            #     'New Description',
+            #     'new/image/location'
+            # ))
+
         elif len(sys.argv) == 3:
             add_data = sys.argv[1]
             data_tags = sys.argv[2].split(',')

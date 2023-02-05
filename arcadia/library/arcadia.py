@@ -5,7 +5,7 @@ from typing import Any, Union
 
 from .arcadia_types import DataViewType, VineRoot
 from .collectors.scraper import Scraper
-from .db.db_types import AddDbItemResponse, ItemPackage, ArcadiaDataType
+from .db.db_types import AddDbItemResponse, ItemPackage, ArcadiaDataType, UpdateDbItemResponse, DeleteDbItemResponse
 from .vine import Vine
 from .db.arcadia_db import ArcadiaDb
 
@@ -26,52 +26,34 @@ class Arcadia:
             subjects_list: list[str] = subjects.split(',')
         return subjects_list
 
+    @staticmethod
+    def _tags_invalid(tags: list[str]) -> bool:
+        return '' in tags
+
     def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {
             'added_item': False,
             'reason': 'error',
             'data': []
         }
-        print(item_package['tags'])
-        if '' in item_package['tags']:
+        if Arcadia._tags_invalid(item_package['tags']):
             response['reason'] = 'empty_string_tag'
             response['data'] = item_package['tags']
+            self._logger.error('Unaccepted empty string tag')
             return response
         else:
             try:
-                attempt_insert: AddDbItemResponse = self._arcadia_db.insert_record(item_package)
+                response = self._arcadia_db.insert_record(item_package)
                 if item_package['data_type'] == ArcadiaDataType.URL:
                     self.update_item_meta(item_package['content'])
-                return attempt_insert
             except TypeError as type_error:
                 self._logger.error(f'Received error trying to add record: {str(type_error)}')
                 response['data'] = ['Received error trying to add record']
-                return response
             except Exception as error:
                 self._logger.error(f'Received error trying to add record: {str(error)}')
                 response['data'] = ['Received error trying to add record']
+            finally:
                 return response
-
-    def update_item_meta(self, db_url: str) -> None:
-        try:
-            self._logger.info(f'Attempting to get: {db_url}')
-            payload = Scraper.get_url_meta(db_url)
-
-            if payload:
-                title = payload['title']['content'] if payload['title'] else 'None'
-                description = payload['description']['content'] if payload['description'] else 'None'
-                image = payload['image']['href'] if payload['image'] else 'None'
-                self._arcadia_db.update_record_meta(
-                    db_url,
-                    title.strip(),
-                    description.strip(),
-                    image.strip()
-                )
-            else:
-                self._logger.error(f'Unsuccessful getting meta for: {db_url}')
-        except Exception as e:
-            self._logger.error(f'Exception was thrown: {str(e)}')
-            raise
 
     def get_summary(self, main_tag: str) -> Union[VineRoot, str]:
         try:
@@ -134,3 +116,57 @@ class Arcadia:
             return similar_subjects
         except TypeError as type_error:
             self._logger.error(f'Received error getting similar subjects: {str(type_error)}')
+
+    def update_item_meta(self, db_url: str) -> None:
+        try:
+            self._logger.info(f'Attempting to get: {db_url}')
+            payload = Scraper.get_url_meta(db_url)
+
+            if payload:
+                title = payload['title']['content'] if payload['title'] else 'None'
+                description = payload['description']['content'] if payload['description'] else 'None'
+                image = payload['image']['href'] if payload['image'] else 'None'
+                self._arcadia_db.update_record_meta(
+                    db_url,
+                    title.strip(),
+                    description.strip(),
+                    image.strip()
+                )
+            else:
+                self._logger.error(f'Unsuccessful getting meta for: {db_url}')
+        except Exception as e:
+            self._logger.error(f'Exception was thrown: {str(e)}')
+
+    def update_item(self, data_key: str, new_data_key: str, title: str, tags: list[str], description: str,
+                    image_location: str) -> UpdateDbItemResponse:
+        response: UpdateDbItemResponse = {
+            'updated_item': False,
+            'reason': 'error',
+            'data': []
+        }
+        if Arcadia._tags_invalid(tags):
+            response['reason'] = 'empty_string_tag'
+            response['data'] = tags
+            self._logger.error('Unaccepted empty string tag')
+            return response
+        else:
+            try:
+                response = self._arcadia_db.update_record(data_key, new_data_key, title, tags, description,
+                                                          image_location)
+            except Exception as e:
+                self._logger.error(f'Exception was thrown: {str(e)}')
+            finally:
+                return response
+
+    def delete_item(self, data_key: str) -> DeleteDbItemResponse:
+        response: DeleteDbItemResponse = {
+            'deleted_item': False,
+            'reason': 'error',
+            'data': []
+        }
+        try:
+            response = self._arcadia_db.delete_record(data_key)
+        except Exception as exception:
+            self._logger.error(f'Exception was thrown: {str(exception)}')
+        finally:
+            return response

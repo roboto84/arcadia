@@ -4,7 +4,7 @@ import os
 from willow_core.library.sqlite_db import SqlLiteDb
 from sqlite3 import Connection, Cursor, Error, Row
 from typing import Any
-from .db_types import AddDbItemResponse, ItemPackage
+from .db_types import AddDbItemResponse, ItemPackage, UpdateDbItemResponse, DeleteDbItemResponse
 
 
 class ArcadiaDb(SqlLiteDb):
@@ -36,7 +36,7 @@ class ArcadiaDb(SqlLiteDb):
         except Error as error:
             self._logger.error(f'Error occurred initializing Arcadia_DB: {str(error)}')
 
-    def _query_for_db_rows(self, sqlite_query) -> list[Row]:
+    def _query_for_db_rows(self, sqlite_query: str) -> list[Row]:
         try:
             conn: Connection = self._db_connect()
             self.set_row_factory(conn)
@@ -48,7 +48,7 @@ class ArcadiaDb(SqlLiteDb):
         except Error as error:
             self._logger.error(f'Error occurred getting tags from Arcadia_DB: {str(error)}')
 
-    def _get_column(self, column) -> list[Row]:
+    def _get_column(self, column: str) -> list[Row]:
         return self._query_for_db_rows(f'select {column} from ITEMS')
 
     def get_records(self, tag: str) -> list[Row]:
@@ -56,8 +56,8 @@ class ArcadiaDb(SqlLiteDb):
             f'select * from ITEMS '
             f'where data LIKE "%{tag}%" or '
             f'tags LIKE "%\'{tag}%" or '
-            f'title LIKE "%{tag}%" or '
-            f'description LIKE "%{tag}%" '
+            f'title LIKE "% {tag} %" or '
+            f'description LIKE "% {tag} %" '
             f'order by id desc'
         )
 
@@ -97,10 +97,10 @@ class ArcadiaDb(SqlLiteDb):
             except Error as error:
                 self._logger.error(f'Error occurred inserting record into Arcadia_DB: {str(error)}')
             except IOError as io_error:
-                self._logger.error(f'IOError was thrown: {str(io_error)}')
+                self._logger.error(f'IOError was thrown inserting record: {str(io_error)}')
                 raise
             except Exception as exception:
-                self._logger.error(f'Exception was thrown: {str(exception)}')
+                self._logger.error(f'Exception was thrown inserting record: {str(exception)}')
                 raise
         else:
             self._logger.info(f'"{item_data}" is already in the DB, not reinserting')
@@ -108,19 +108,66 @@ class ArcadiaDb(SqlLiteDb):
         self._db_close(conn)
         return response
 
-    def update_record_meta(self, data_key, title, description, image) -> None:
+    def update_record_meta(self, data_key: str, title: str, description: str, image_location: str) -> None:
         try:
             conn: Connection = self._db_connect()
-            self.set_row_factory(conn)
             db_cursor: Cursor = conn.cursor()
             db_cursor.execute(
                 """UPDATE items SET title = ?, description = ?, image = ? WHERE data = ?;""",
-                [title, description, image, data_key]
+                [title, description, image_location, data_key]
             )
             self._db_close(conn)
             self._logger.info(f'Updated meta data successfully for: {data_key}')
         except Error as error:
             self._logger.error(f'Error occurred updating meta on Arcadia_DB at {data_key}: {str(error)}')
         except Exception as exception:
-            self._logger.error(f'Exception was thrown: {str(exception)}')
+            self._logger.error(f'Exception was thrown updating meta: {str(exception)}')
             raise
+
+    def update_record(self, data_key: str, new_data_key: str, title: str, tags: list[str], description: str,
+                      image_location: str) -> UpdateDbItemResponse:
+        response: UpdateDbItemResponse = {
+            'updated_item': False,
+            'reason': 'error',
+            'data': []
+        }
+        try:
+            conn: Connection = self._db_connect()
+            db_cursor: Cursor = conn.cursor()
+            db_cursor.execute(
+                """UPDATE items SET data=?, tags=?, title = ?, description = ?, image = ? WHERE data = ?;""",
+                [new_data_key, str(tags), title, description, image_location, data_key]
+            )
+            self._db_close(conn)
+            self._logger.info(f'Updated record data successfully for: {data_key}')
+            response['updated_item'] = True
+            response['reason'] = 'item_updated'
+        except Error as error:
+            self._logger.error(f'Error occurred updating record on Arcadia_DB at {data_key}: {str(error)}')
+        except Exception as exception:
+            self._logger.error(f'Exception was thrown updating record: {str(exception)}')
+            raise
+        finally:
+            return response
+
+    def delete_record(self, data_key: str) -> DeleteDbItemResponse:
+        response: DeleteDbItemResponse = {
+            'deleted_item': False,
+            'reason': 'error',
+            'data': []
+        }
+        try:
+            conn: Connection = self._db_connect()
+            db_cursor: Cursor = conn.cursor()
+            db_cursor.execute("""DELETE FROM items WHERE data = ?;""", [data_key])
+            self._db_close(conn)
+            self._logger.info(f'Deleted record successfully for: {data_key}')
+            response['deleted_item'] = True
+            response['reason'] = 'item_deleted'
+        except Error as error:
+            self._logger.error(f'Error occurred deleting record on Arcadia_DB at {data_key}: {str(error)}')
+        except Exception as exception:
+            self._logger.error(f'Exception was thrown deleting record: {str(exception)}')
+            raise
+        finally:
+            return response
