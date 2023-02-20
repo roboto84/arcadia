@@ -51,13 +51,18 @@ class ArcadiaDb(SqlLiteDb):
     def _get_column(self, column: str) -> list[Row]:
         return self._query_for_db_rows(f'select {column} from ITEMS')
 
-    def get_records(self, tag: str) -> list[Row]:
+    def get_records(self, search_term: str) -> list[Row]:
+        searchable_length: int = 3
+        data_search: str = f'data LIKE "%{search_term}%" or ' if len(search_term) > searchable_length else ''
         return self._query_for_db_rows(
-            f'select * from ITEMS '
-            f'where data LIKE "%{tag}%" or '
-            f'tags LIKE "%\'{tag}%" or '
-            f'title LIKE "% {tag} %" or '
-            f'description LIKE "% {tag} %" '
+            f'select * from ITEMS where '
+            f'{data_search}'
+            f'tags LIKE "%\'{search_term}\'%" or '
+            f'tags LIKE "%\_{search_term}\'%" or '
+            f'tags LIKE "%\'{search_term}\_%" or '
+            f'title LIKE "% {search_term} %" or '
+            f'description LIKE "% {search_term} %" '
+            f'escape "\\" '
             f'order by id desc'
         )
 
