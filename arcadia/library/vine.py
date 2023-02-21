@@ -54,8 +54,6 @@ class Vine:
             for record in records:
                 record_copy = dict(record).copy()
                 record_copy['tags'] = ast.literal_eval(record_copy['tags'])
-                if len(record_copy['tags']) != 1 and self._vine['subject'] in record_copy['tags']:
-                    record_copy['tags'].remove(self._vine['subject'])
                 self._vine_sub_categories = self._vine_sub_categories + record_copy['tags']
                 self._records.append(record_copy)
         except TypeError as type_error:
@@ -68,14 +66,16 @@ class Vine:
                 for sub_category in self._vine_sub_categories:
                     if sub_category in record['tags']:
                         node_type = NodeType.subNode
-                        if sub_category == self._vine['subject']:
+                        if sub_category == self._vine['subject'] and len(record['tags']) == 1:
                             node_type = NodeType.root
                         record['tags'].remove(sub_category)
-                        new_node: VineNode = self._get_vine_node(sub_category, node_type)
-                        if record['data_type'] == ArcadiaDataType.NOTE.value:
-                            new_node['notes'].append(record)
-                        elif record['data_type'] == ArcadiaDataType.URL.value:
-                            new_node['urls'].append(record)
+
+                        if node_type == NodeType.root or sub_category != self._vine['subject']:
+                            new_node: VineNode = self._get_vine_node(sub_category, node_type)
+                            if record['data_type'] == ArcadiaDataType.NOTE.value:
+                                new_node['notes'].append(record)
+                            elif record['data_type'] == ArcadiaDataType.URL.value:
+                                new_node['urls'].append(record)
                 record['tags'] = tags_copy
 
         except TypeError as type_error:
