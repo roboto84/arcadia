@@ -1,16 +1,16 @@
 [tool.poetry]
 name = 'arcadia'
-version = '0.2.1'
+version = '0.2.2'
 description = 'Command line and lib toolset for data organization framework'
 authors = ['roboto84 <7658704+roboto84@users.noreply.github.com>']
 
 [tool.poetry.dependencies]
 python = '^3.10'
-requests = '^2.25.0'
 pyuseragents = '^1.0.5'
 beautifulsoup4 = '^4.11.1'
 python-dotenv = '^0.15.0'
 willow-core = {git = 'https://github.com/roboto84/willow_core.git', tag = 'v0.1.1'}
+requests = '^2.30.0'
 
 [tool.poetry.dev-dependencies]
 pytest = '^7.2.0'

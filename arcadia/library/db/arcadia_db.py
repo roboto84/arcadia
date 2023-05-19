@@ -1,4 +1,3 @@
-
 import logging.config
 import os
 from willow_core.library.sqlite_db import SqlLiteDb
@@ -61,7 +60,7 @@ class ArcadiaDb(SqlLiteDb):
     def get_tags(self) -> list[Row]:
         return self._query_for_db_rows(
             "SELECT tag FROM (SELECT value AS tag FROM items, json_each(REPLACE(tags, '''', '\"'))) GROUP BY tag"
-            )
+        )
 
     def get_tag_count(self) -> Row:
         return self._query_for_db_rows(
@@ -105,7 +104,13 @@ class ArcadiaDb(SqlLiteDb):
                 with open(sql_path, 'r') as file:
                     db_cursor.execute(
                         file.read(),
-                        (self._get_time(), item_data, item_package['data_type'].value, str(item_package['tags'])))
+                        (
+                            self._get_time(),
+                            item_data,
+                            item_package['data_type'].value,
+                            str(item_package['tags']).lower()
+                        )
+                    )
                 response: AddDbItemResponse = {
                     'added_item': True,
                     'reason': 'item_added',
