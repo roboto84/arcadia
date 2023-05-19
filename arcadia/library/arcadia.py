@@ -1,3 +1,4 @@
+import ast
 import logging.config
 import sqlite3
 from typing import Any, Union
@@ -33,7 +34,9 @@ class Arcadia:
         return int(self._arcadia_db.get_url_record_count()[0])
 
     def get_random_url_item(self) -> dict:
-        return dict(self._arcadia_db.get_random_url_record())
+        item: dict = dict(self._arcadia_db.get_random_url_record())
+        item['tags'] = ast.literal_eval(item['tags'])
+        return item
 
     def get_item_count(self) -> int:
         return int(self._arcadia_db.get_record_count()[0])
