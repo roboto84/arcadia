@@ -1,6 +1,5 @@
 import logging.config
 import sqlite3
-import ast
 from typing import Any, Union
 
 from .arcadia_types import DataViewType, VineRoot
@@ -18,7 +17,7 @@ class Arcadia:
         self._data_view_type: DataViewType = data_view_type
         self._arcadia_db: ArcadiaDb = ArcadiaDb(logging_object, sql_lite_db_path)
 
-    def _get_subjects_list(self) -> list:
+    def _get_subjects_list(self) -> list[str]:
         subjects: Union[str, list] = self.get_subjects()
         if isinstance(subjects, list):
             subjects_list = subjects
@@ -29,6 +28,15 @@ class Arcadia:
     @staticmethod
     def _tags_invalid(tags: list[str]) -> bool:
         return '' in tags
+
+    def get_url_item_count(self) -> int:
+        return int(self._arcadia_db.get_url_record_count()[0])
+
+    def get_random_url_item(self) -> dict:
+        return dict(self._arcadia_db.get_random_url_record())
+
+    def get_item_count(self) -> int:
+        return int(self._arcadia_db.get_record_count()[0])
 
     def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {
@@ -68,17 +76,14 @@ class Arcadia:
     def get_subjects(self) -> Union[str, list]:
         try:
             db_tags: list[sqlite3.Row] = self._arcadia_db.get_tags()
-            subjects: list = []
-
-            for tag in db_tags:
-                tags: list = ast.literal_eval(tag['tags'])
-                for item_tag in tags:
-                    if item_tag not in subjects:
-                        subjects.append(item_tag)
+            subjects: list = [db_tag[0] for db_tag in db_tags]
             subjects.sort(key=lambda subject: subject.lower())
             return subjects if self._data_view_type == DataViewType.RAW else Vine.tag_string(subjects)
         except TypeError as type_error:
             self._logger.error(f'Received error getting arcadia subjects: {str(type_error)}')
+
+    def get_subject_count(self) -> int:
+        return int(self._arcadia_db.get_tag_count()[0])
 
     def get_subjects_dictionary(self) -> dict[str:list[str]]:
         try:
@@ -105,9 +110,9 @@ class Arcadia:
         except Exception as error:
             self._logger.error(f'Received error trying to get subjects dict: {str(error)}')
 
-    def get_similar_subjects(self, main_tag: str) -> list:
+    def get_similar_subjects(self, main_tag: str) -> list[str]:
         try:
-            similar_subjects: list = []
+            similar_subjects: list[str] = []
             subjects_list = self._get_subjects_list()
 
             for subject in subjects_list:

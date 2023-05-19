@@ -67,7 +67,24 @@ class ArcadiaDb(SqlLiteDb):
         )
 
     def get_tags(self) -> list[Row]:
-        return self._get_column('tags')
+        return self._query_for_db_rows(
+            "SELECT tag FROM (SELECT value AS tag FROM items, json_each(REPLACE(tags, '''', '\"'))) GROUP BY tag"
+            )
+
+    def get_tag_count(self) -> Row:
+        return self._query_for_db_rows(
+            "SELECT COUNT(*) FROM (SELECT tag FROM (SELECT value AS tag FROM items, json_each(REPLACE(tags, '''', "
+            "'\"'))) GROUP BY tag)"
+        )[0]
+
+    def get_record_count(self) -> Row:
+        return self._query_for_db_rows("SELECT COUNT(*) FROM items")[0]
+
+    def get_random_url_record(self) -> Row:
+        return self._query_for_db_rows("SELECT * FROM items WHERE data_type='URL' ORDER BY RANDOM() LIMIT 1")[0]
+
+    def get_url_record_count(self) -> Row:
+        return self._query_for_db_rows("SELECT COUNT(*) FROM items WHERE data_type='URL'")[0]
 
     def get_meta_data(self) -> list[Row]:
         return self._get_column('data, title, description, image')

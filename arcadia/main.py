@@ -20,7 +20,13 @@ if __name__ == '__main__':
             search_term = sys.argv[1]
             arcadia = Arcadia(logging, SQL_LITE_DB, DataViewType.TEXT)
             subjects = arcadia.get_subjects_dictionary()
-            print(f'Similar Tags: {arcadia.get_similar_subjects(search_term)}')
+
+            # TODO: Look at supplying stats through CLI
+            # print(f'Total Tag Count: {arcadia.get_subject_count()}')
+            # print(f'Total Item Count: {arcadia.get_item_count()}')
+            # print(f'Total Url Count: {arcadia.get_url_item_count()}')
+
+            print(f'\nSimilar Tags: {arcadia.get_similar_subjects(search_term)}\n')
             print(arcadia.get_summary(search_term))
 
             # TODO: Support deleting/updating items through CLI
