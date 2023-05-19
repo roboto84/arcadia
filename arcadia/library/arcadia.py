@@ -5,9 +5,10 @@ from typing import Any, Union
 
 from .arcadia_types import DataViewType, VineRoot
 from .collectors.scraper import Scraper
-from .db.db_types import AddDbItemResponse, ItemPackage, ArcadiaDataType, UpdateDbItemResponse, DeleteDbItemResponse
+from .db.db_types import AddDbItemResponse, ItemPackage, ArcadiaDataType, UpdateDbItemResponse
 from .vine import Vine
 from .db.arcadia_db import ArcadiaDb
+from willow_core.library.db_types import DeleteDbItemResponse
 
 
 class Arcadia:
@@ -173,7 +174,7 @@ class Arcadia:
             'data': []
         }
         try:
-            response = self._arcadia_db.delete_record(data_key)
+            response = self._arcadia_db.delete_arc_record(data_key)
         except Exception as exception:
             self._logger.error(f'Exception was thrown: {str(exception)}')
         finally:

@@ -27,12 +27,6 @@ class UpdateDbItemResponse(TypedDict):
     data: list[str]
 
 
-class DeleteDbItemResponse(TypedDict):
-    deleted_item: bool
-    reason: str
-    data: list[str]
-
-
 class ItemPackage(TypedDict):
     data_type: ArcadiaDataType
     content: str
