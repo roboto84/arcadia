@@ -15,18 +15,6 @@ class ArcadiaDbRecord(TypedDict):
     data_type: str
 
 
-class AddDbItemResponse(TypedDict):
-    added_item: bool
-    reason: str
-    data: list[str]
-
-
-class UpdateDbItemResponse(TypedDict):
-    updated_item: bool
-    reason: str
-    data: list[str]
-
-
 class ItemPackage(TypedDict):
     data_type: ArcadiaDataType
     content: str

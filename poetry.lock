@@ -311,7 +311,7 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "willow-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Core python libraries shared amongst various projects"
 category = "main"
 optional = false
@@ -322,10 +322,10 @@ develop = false
 [package.source]
 type = "git"
 url = 'https://github.com/roboto84/willow_core.git'
-reference = 'v0.1.0'
-resolved_reference = "7c2ca23c30fb781f9280bd4756cf3479a430c1d5"
+reference = 'v0.1.1'
+resolved_reference = "5f16f674e48bebf98d94afa1bf578693b6def7f5"
 
 [metadata]
 lock-version = "2.0"
 python-versions = '^3.10'
-content-hash = "aabd72fc425504af45b1e2128229de4ad511abb5cdd946c77cf0f69782d71b2d"
+content-hash = "de313b72b12230142ac1fdb2363f77aa18c508755353a64233c34a71218fe77b"

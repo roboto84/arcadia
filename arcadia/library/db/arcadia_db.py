@@ -2,10 +2,10 @@
 import logging.config
 import os
 from willow_core.library.sqlite_db import SqlLiteDb
-from willow_core.library.db_types import DeleteDbItemResponse
+from willow_core.library.db_types import DeleteDbItemResponse, AddDbItemResponse, UpdateDbItemResponse
 from sqlite3 import Connection, Cursor, Error, Row
 from typing import Any
-from .db_types import AddDbItemResponse, ItemPackage, UpdateDbItemResponse
+from .db_types import ItemPackage
 
 
 class ArcadiaDb(SqlLiteDb):
@@ -79,7 +79,7 @@ class ArcadiaDb(SqlLiteDb):
         return self._get_column('data, title, description, image')
 
     def delete_arc_record(self, data_key: str) -> DeleteDbItemResponse:
-        return self.delete_record(data_key, 'items')
+        return self.delete_record(data_key, 'data', 'items')
 
     def insert_record(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {
