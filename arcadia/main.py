@@ -29,7 +29,7 @@ if __name__ == '__main__':
             print(f'\nSimilar Tags: {arcadia.get_similar_subjects(search_term)}\n')
             print(arcadia.get_summary(search_term))
 
-            # TODO: Support deleting/updating items through CLI
+            # TODO: Support getting/deleting/updating items through CLI
             # arcadia.delete_item('https://www.youtube.com/@MrCastIron/videos')
             # print(arcadia.update_item(
             #     'https://9anime.g/',
@@ -39,6 +39,7 @@ if __name__ == '__main__':
             #     'New Description',
             #     'new/image/location'
             # ))
+            # print(arcadia.get_item('https://www.openfietsmap.nl/downloads/europe'))
 
         elif len(sys.argv) == 3:
             add_data = sys.argv[1]

@@ -6,7 +6,7 @@ from typing import Any, Union
 from willow_core.library.db_types import DeleteDbItemResponse, UpdateDbItemResponse, AddDbItemResponse
 from .arcadia_types import DataViewType, VineRoot
 from .collectors.scraper import Scraper
-from .db.db_types import ItemPackage, ArcadiaDataType
+from .db.db_types import ItemPackage, ArcadiaDataType, ArcadiaDbRecord
 from .vine import Vine
 from .db.arcadia_db import ArcadiaDb
 
@@ -34,13 +34,16 @@ class Arcadia:
     def get_url_item_count(self) -> int:
         return int(self._arcadia_db.get_url_record_count()[0])
 
-    def get_random_url_item(self) -> dict:
+    def get_random_url_item(self) -> ArcadiaDbRecord:
         item: dict = dict(self._arcadia_db.get_random_url_record())
         item['tags'] = ast.literal_eval(item['tags'])
         return item
 
     def get_item_count(self) -> int:
         return int(self._arcadia_db.get_record_count()[0])
+
+    def get_item(self, item_key) -> ArcadiaDbRecord:
+        return dict(self._arcadia_db.get_record(item_key))
 
     def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {

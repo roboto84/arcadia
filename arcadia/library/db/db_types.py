@@ -13,6 +13,9 @@ class ArcadiaDbRecord(TypedDict):
     data: str
     tags: list[str]
     data_type: str
+    title: str
+    description: str
+    image: str
 
 
 class ItemPackage(TypedDict):
