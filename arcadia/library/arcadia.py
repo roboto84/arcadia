@@ -43,7 +43,9 @@ class Arcadia:
         return int(self._arcadia_db.get_record_count()[0])
 
     def get_item(self, item_key) -> ArcadiaDbRecord:
-        return dict(self._arcadia_db.get_record(item_key))
+        item: dict = dict(self._arcadia_db.get_record(item_key))
+        item['tags'] = ast.literal_eval(item['tags'])
+        return item
 
     def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
         response: AddDbItemResponse = {
