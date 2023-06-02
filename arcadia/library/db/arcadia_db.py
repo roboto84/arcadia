@@ -19,7 +19,7 @@ class ArcadiaDb(SqlLiteDb):
         return f'{os.path.dirname(__file__)}{relative_file_path}'
 
     def _check_db_schema(self) -> None:
-        if self._check_db_state(['items']):
+        if self._check_db_state(['ITEMS']):
             self._logger.info(f'DB schema looks good')
         else:
             self._logger.info(f'Tables not found')
@@ -40,7 +40,14 @@ class ArcadiaDb(SqlLiteDb):
         return self._query_for_db_rows(f'select {column} from ITEMS')
 
     def get_record(self, item_key: str) -> Row:
-        return self._query_for_db_rows(f'SELECT * FROM items WHERE data=\'{item_key}\'')[0]
+        db_record: list[Row] = self._query_for_db_rows(f'SELECT * FROM items WHERE data=\'{item_key}\'')
+        return db_record[0] if len(db_record) == 1 else {}
+
+    def get_random_url_record(self) -> Row:
+        db_random_url: list[Row] = self._query_for_db_rows(
+            "SELECT * FROM items WHERE data_type='URL' ORDER BY RANDOM() LIMIT 1"
+        )
+        return db_random_url[0] if len(db_random_url) == 1 else {}
 
     def get_records(self, search_term: str) -> list[Row]:
         searchable_length: int = 3
@@ -70,9 +77,6 @@ class ArcadiaDb(SqlLiteDb):
 
     def get_record_count(self) -> Row:
         return self._query_for_db_rows("SELECT COUNT(*) FROM items")[0]
-
-    def get_random_url_record(self) -> Row:
-        return self._query_for_db_rows("SELECT * FROM items WHERE data_type='URL' ORDER BY RANDOM() LIMIT 1")[0]
 
     def get_url_record_count(self) -> Row:
         return self._query_for_db_rows("SELECT COUNT(*) FROM items WHERE data_type='URL'")[0]

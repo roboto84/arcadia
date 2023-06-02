@@ -34,17 +34,19 @@ class Arcadia:
     def get_url_item_count(self) -> int:
         return int(self._arcadia_db.get_url_record_count()[0])
 
-    def get_random_url_item(self) -> ArcadiaDbRecord:
-        item: dict = dict(self._arcadia_db.get_random_url_record())
-        item['tags'] = ast.literal_eval(item['tags'])
-        return item
-
     def get_item_count(self) -> int:
         return int(self._arcadia_db.get_record_count()[0])
 
     def get_item(self, item_key) -> ArcadiaDbRecord:
         item: dict = dict(self._arcadia_db.get_record(item_key))
-        item['tags'] = ast.literal_eval(item['tags'])
+        if 'tags' in item:
+            item['tags'] = ast.literal_eval(item['tags'])
+        return item
+
+    def get_random_url_item(self) -> ArcadiaDbRecord:
+        item: dict = dict(self._arcadia_db.get_random_url_record())
+        if 'tags' in item:
+            item['tags'] = ast.literal_eval(item['tags'])
         return item
 
     def add_item(self, item_package: ItemPackage) -> AddDbItemResponse:
