@@ -5,6 +5,7 @@ from willow_core.library.db_types import DeleteDbItemResponse, AddDbItemResponse
 from sqlite3 import Connection, Cursor, Error, Row
 from typing import Any
 from .db_types import ItemPackage
+from .initial_db_data import initial_records
 
 
 class ArcadiaDb(SqlLiteDb):
@@ -24,6 +25,7 @@ class ArcadiaDb(SqlLiteDb):
         else:
             self._logger.info(f'Tables not found')
             self._create_db_schema()
+            self._load_init_db_data()
 
     def _create_db_schema(self) -> None:
         try:
@@ -35,6 +37,12 @@ class ArcadiaDb(SqlLiteDb):
             self._logger.info(f'Database has been initialized')
         except Error as error:
             self._logger.error(f'Error occurred initializing Arcadia_DB: {str(error)}')
+
+    def _load_init_db_data(self) -> None:
+        for record in initial_records:
+            db_url: str = record[0]['content']
+            self.insert_record(record[0])
+            self.update_record_meta(db_url, **record[1])
 
     def _get_column(self, column: str) -> list[Row]:
         return self._query_for_db_rows(f'select {column} from ITEMS')
