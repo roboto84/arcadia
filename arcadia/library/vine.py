@@ -66,7 +66,7 @@ class Vine:
                 for sub_category in self._vine_sub_categories:
                     if sub_category in record['tags']:
                         node_type = NodeType.subNode
-                        if sub_category == self._vine['subject'] and len(record['tags']) == 1:
+                        if sub_category == self._vine['subject'] and len(tags_copy) == 1:
                             node_type = NodeType.root
                         record['tags'].remove(sub_category)
 

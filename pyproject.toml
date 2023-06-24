@@ -1,6 +1,6 @@
 [tool.poetry]
 name = 'arcadia'
-version = '0.2.4'
+version = '0.2.5'
 description = 'Command line and lib toolset for data organization framework'
 authors = ['roboto84 <7658704+roboto84@users.noreply.github.com>']
 
