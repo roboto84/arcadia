@@ -66,8 +66,8 @@ class ArcadiaDb(SqlLiteDb):
             f'tags LIKE "%\'{search_term}\'%" or '
             f'tags LIKE "%\_{search_term}\'%" or '
             f'tags LIKE "%\'{search_term}\_%" or '
-            f'title LIKE "% {search_term} %" or '
-            f'description LIKE "% {search_term} %" '
+            f'title LIKE "%{search_term}%" or '
+            f'description LIKE "%{search_term}%" '
             f'escape "\\" '
             f'order by id desc'
         )
