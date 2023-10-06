@@ -74,13 +74,18 @@ class ArcadiaDb(SqlLiteDb):
 
     def get_tags(self) -> list[Row]:
         return self._query_for_db_rows(
-            "SELECT tag FROM (SELECT value AS tag FROM items, json_each(REPLACE(tags, '''', '\"'))) GROUP BY tag"
+            "SELECT value AS tag FROM items, json_each(REPLACE(tags, '''', '\"')) GROUP BY tag"
+        )
+
+    def get_tags_with_count(self) -> list[Row]:
+        return self._query_for_db_rows(
+            "SELECT value AS tag, COUNT(*) AS count FROM items, json_each(REPLACE(tags, '''', '\"')) "
+            "GROUP BY tag ORDER BY count DESC"
         )
 
     def get_tag_count(self) -> Row:
         return self._query_for_db_rows(
-            "SELECT COUNT(*) FROM (SELECT tag FROM (SELECT value AS tag FROM items, json_each(REPLACE(tags, '''', "
-            "'\"'))) GROUP BY tag)"
+            "SELECT COUNT(*) FROM (SELECT value AS tag FROM items, json_each(REPLACE(tags, '''', '\"')) GROUP BY tag)"
         )[0]
 
     def get_record_count(self) -> Row:

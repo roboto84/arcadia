@@ -96,6 +96,9 @@ class Arcadia:
     def get_subject_count(self) -> int:
         return int(self._arcadia_db.get_tag_count()[0])
 
+    def get_counts_of_subjects(self) -> list[dict]:
+        return [dict(row) for row in self._arcadia_db.get_tags_with_count()]
+
     def get_subjects_dictionary(self) -> dict[str:list[str]]:
         try:
             subjects_list = self._get_subjects_list()

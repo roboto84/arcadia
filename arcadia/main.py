@@ -30,7 +30,7 @@ if __name__ == '__main__':
             print(arcadia.get_summary(search_term))
 
             # TODO: Support getting/deleting/updating items through CLI
-            # print(arcadia.get_subjects())
+            print(arcadia.get_counts_of_subjects())
             # print(arcadia.get_random_url_item())
             # arcadia.delete_item('https://www.youtube.com/@MrCastIron/videos')
             # print(arcadia.update_item(
