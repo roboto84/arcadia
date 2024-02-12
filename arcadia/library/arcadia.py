@@ -77,7 +77,7 @@ class Arcadia:
     def get_summary(self, main_tag: str) -> Union[VineRoot, str]:
         try:
             records: list[sqlite3.Row] = self._arcadia_db.get_records(main_tag)
-            arcadia_vine: Vine = Vine(self._logging_object, main_tag, records, self._data_view_type)
+            arcadia_vine: Vine = Vine(self._logging_object, main_tag.lower(), records, self._data_view_type)
             if self._data_view_type == DataViewType.RAW:
                 return arcadia_vine.get_vine_root()
             return arcadia_vine.__str__()
@@ -128,9 +128,10 @@ class Arcadia:
         try:
             similar_subjects: list[str] = []
             subjects_list = self._get_subjects_list()
+            lowercase_main_tag: str = main_tag.lower()
 
             for subject in subjects_list:
-                if main_tag != subject and main_tag in subject:
+                if lowercase_main_tag != subject and lowercase_main_tag in subject:
                     similar_subjects.append(subject)
             return similar_subjects
         except TypeError as type_error:

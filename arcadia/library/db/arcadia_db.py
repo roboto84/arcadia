@@ -59,15 +59,16 @@ class ArcadiaDb(SqlLiteDb):
 
     def get_records(self, search_term: str) -> list[Row]:
         searchable_length: int = 3
+        lowercase_search_term: str = search_term.lower()
         data_search: str = f'data LIKE "%{search_term}%" or ' if len(search_term) > searchable_length else ''
         return self._query_for_db_rows(
             f'select * from ITEMS where '
             f'{data_search}'
-            f'tags LIKE "%\'{search_term}\'%" or '
-            f'tags LIKE "%\_{search_term}\'%" or '
-            f'tags LIKE "%\'{search_term}\_%" or '
-            f'title LIKE "%{search_term}%" or '
-            f'description LIKE "%{search_term}%" '
+            f'LOWER(tags) LIKE "%\'{lowercase_search_term}\'%" or '
+            f'LOWER(tags) LIKE "%\_{lowercase_search_term}\'%" or '
+            f'LOWER(tags) LIKE "%\'{lowercase_search_term}\_%" or '
+            f'LOWER(title) LIKE "%{lowercase_search_term}%" or '
+            f'LOWER(description) LIKE "%{lowercase_search_term}%" '
             f'escape "\\" '
             f'order by id desc'
         )

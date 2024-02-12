@@ -1,4 +1,3 @@
-
 import ast
 import sqlite3
 import logging.config
@@ -41,9 +40,7 @@ class Vine:
                     main_category_summary += self._main_category_summary(self._vine['main_node'], NodeType.root)
                 for node in self._vine['sub_node']:
                     sub_category_summaries += self._sub_category_summary(node, NodeType.subNode)
-                return f'{title_view}' \
-                       f'{main_category_summary}\n' \
-                       f'{sub_category_summaries}'
+                return f'{title_view}{main_category_summary}\n{sub_category_summaries}'
         except TypeError as type_error:
             self._logger.error(f'Received type error outputting string representation: {str(type_error)}')
         except NameError as name_error:
@@ -64,9 +61,10 @@ class Vine:
             for record in records:
                 tags_copy = record['tags'].copy()
                 for sub_category in self._vine_sub_categories:
+                    lowercased_sub_category: str = sub_category.lower()
                     if sub_category in record['tags']:
                         node_type = NodeType.subNode
-                        if sub_category == self._vine['subject'] and len(tags_copy) == 1:
+                        if lowercased_sub_category == self._vine['subject']:
                             node_type = NodeType.root
                         record['tags'].remove(sub_category)
 
@@ -110,9 +108,8 @@ class Vine:
     def _sub_category_summary(self, node, node_type: NodeType) -> str:
         subtitle_raw: str = node["subject"]
         subtitle: str = f'*{subtitle_raw}*' \
-            if self._data_view_type == DataViewType.ENHANCED_TEXT else f'{subtitle_raw}:'
-        return f'  {subtitle}\n' \
-               f'  {self._category_summary(node, node_type)}'
+            if self._data_view_type == DataViewType.ENHANCED_TEXT else f'{subtitle_raw}: '
+        return f'  {subtitle}\n{self._category_summary(node, node_type)}'
 
     def _category_summary(self, node, node_type: NodeType) -> str:
         try:
@@ -137,7 +134,7 @@ class Vine:
     @staticmethod
     def tag_string(tags) -> str:
         if tags:
-            tag_string = ''.join(f'{tag},' for tag in tags).rstrip(', ')
+            tag_string = ''.join(f'{tag}, ' for tag in tags).rstrip(', ')
             return f'{tag_string}'
         else:
             return ''
